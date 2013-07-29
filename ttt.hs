@@ -2,6 +2,7 @@ import Data.List
 
 type Board = [[Char]]
 type Side = Char
+type Position = Int
 
 config = [['1', '2', '3'], 
 		  ['4', '5', '6'], 
@@ -11,38 +12,47 @@ board = [['*', '*', '*'],
 		 ['*', '*', '*'],
 		 ['*', '*', '*']]
 
-prettyPrint :: [[Char]] -> String
+prettyPrint :: Board -> String
 prettyPrint = ((:) ' ') . intersperse ' ' . intercalate "\n"
 
-addMove :: Char -> Int -> [[Char]] -> [[Char]]
+addMove :: Side -> Position -> Board -> Board
 addMove side pos board = board
 
 main :: IO ()
 main = do
-	putStrLn $ "welcome to tic-tac-tonad" ++ "\n"
-	putStrLn "here's the configuration" 
+	putStrLn $ "welcome inside the tic-tac-tonad" ++ "\n"
+	putStrLn "here are the position numbers" 
 	putStrLn $ prettyPrint config ++ "\n"
 	putStrLn "here's the board"
 	putStrLn $ prettyPrint board ++ "\n"
-	xmove board
+	xmove (return board)
 
-xmove :: Board -> IO ()
+xmove :: IO Board -> IO ()
 xmove board = do
-	newBoard move 'X' board
-	ymove 
+	newBoard <- move 'X' board
+	putStrLn $ prettyPrint newBoard ++ "\n"
+	-- i don't like having the printing in both functions
+	-- but i did promise that main :: IO ()
+	ymove (return newBoard)
 
-ymove :: Board -> IO ()
-ymove = do
-	move 'Y' board
-	xmove
+ymove :: IO Board -> IO ()
+ymove board = do
+	newBoard <- move 'Y' board
+	putStrLn $ prettyPrint newBoard ++ "\n"
+	xmove (return newBoard)
 
--- gets move, makes new board with move, prints new board
-move :: Char -> Board -> Board
-move side = do
+-- gets move, makes new board with move
+-- does not print new board
+move :: Side -> IO Board -> IO Board 
+move side board = do
 	putStrLn $ (side : "'s move. enter number of position")
 	(pos :: Int) <- fmap read getLine
-	let newBoard = addMove side pos board
-	putStrLn $ prettyPrint newBoard ++ "\n"
+	boardResult <- board 
+	-- can i fix this? lots of wrapping, unwrapping boards
+	let newBoard = addMove side pos boardResult
+	return newBoard
+
+	
 
 
 
