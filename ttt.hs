@@ -43,28 +43,43 @@ addMove side pos board
 	= Map.alter f pos board
 		where f _ = Just side
 
+won :: Side -> Board -> Bool
+won side board = False
+
+
+----------
+
 main :: IO ()
 main = do
-	putStrLn $ "welcome inside the tic-tac-tonad" ++ "\n"
+	putStrLn $ "welcome inside the tic-tac-tonad" 
+	putStrLn $ "you must now fight an impure battle of I/O" ++ "\n"
 	putStrLn $ "here are the position numbers" ++ "\n"
 	putStrLn $ prettyPrint config ++ "\n"
 	putStrLn $ "here's the board" ++ "\n"
 	putStrLn $ prettyPrint initialBoard ++ "\n"
-	xmove (return config)
+	imove (return config)
 
-xmove :: IO Board -> IO ()
-xmove board = do
-	newBoard <- getMove 'X' board
+imove :: IO Board -> IO ()
+imove board = do
+	newBoard <- getMove 'I' board
 	putStrLn $ "\n" ++ prettyPrint newBoard ++ "\n"
-	-- i don't like having the printing in both functions
-	-- but i did promise that main :: IO ()
-	omove (return newBoard)
+
+	if won 'I' newBoard
+		then do
+			putStrLn "game over. input won!"
+		else do
+			omove (return newBoard)
 
 omove :: IO Board -> IO ()
 omove board = do
 	newBoard <- getMove 'O' board
 	putStrLn $ "\n" ++ prettyPrint newBoard ++ "\n"
-	xmove (return newBoard)
+
+	if won 'O' newBoard
+		then do
+			putStrLn "output won!"
+		else do
+			imove (return newBoard)
 
 -- gets move, makes new board with move
 -- does not print new board
@@ -79,11 +94,11 @@ getMove side board = do
 
 	if checkMove == '-'
 		then do
-			putStrLn $ "\n" ++ "error: out of bounds" ++ "\n"
+			putStrLn $ "\n" ++ "error: out of bounds. too impure of a move" ++ "\n"
 			getMove side board
-		else if checkMove == 'X' || checkMove == 'O'
+		else if checkMove == 'I' || checkMove == 'O'
 			then do
-				putStrLn $ "\n" ++ "error: moved in an occupied space" ++ "\n"
+				putStrLn $ "\n" ++ "error: moved in an occupied space. too impure of a move" ++ "\n"
 				getMove side board
 			else do -- valid move
 				let newBoard = addMove side pos boardResult;
@@ -92,11 +107,11 @@ getMove side board = do
 	
 
 
-
 -- todo: 
 -- check for win
--- write AI
--- fix -XScopedTypeVariables
+-- write AI 
+-- write peanut gallery
+-- fix -XScopedTypeVariables?
 -- learn about do notation (bind, why considered harmful)
 
 

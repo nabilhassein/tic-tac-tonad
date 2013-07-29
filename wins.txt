@@ -1,0 +1,4 @@
+2 diags
+3 horiz
+3 vert
+8 ways total
