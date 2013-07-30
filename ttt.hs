@@ -13,14 +13,27 @@ board = [['*', '*', '*'],
 -}
 
 type Board = Map.Map Int Char
+--type Three = Map.Map String [Int]
+type Three = [Int]
 type Side = Char
-type Position = Int
+--type Position = Int
 
 config :: Board
 config = toBoard ['0'..'8']
 
 initialBoard :: Board
 initialBoard = toBoard $ replicate 9 '*'
+
+threes :: Map.Map String Three
+threes = Map.fromList
+	[("row0", [0, 1, 2]),
+	 ("row1", [3, 4, 5]),
+	 ("row2", [6, 7, 8]),
+	 ("col0", [0, 3, 6]),
+	 ("col1", [1, 4, 7]),
+	 ("col2", [2, 5, 8]),
+	 ("diag0", [0, 4, 8]),
+	 ("diag6", [6, 4, 2])]
 
 toBoard :: [Char] -> Map.Map Int Char
 toBoard = Map.fromList . zip [0..8]
@@ -38,21 +51,26 @@ prettyPrint board =
 			  inRange lower upper (k, v) = lower <= k && k <= upper
 
 -- maps have strange update / alter functions
-addMove :: Side -> Position -> Board -> Board
+addMove :: Side -> Int -> Board -> Board
 addMove side pos board 
 	= Map.alter f pos board
 		where f _ = Just side
 
 won :: Side -> Board -> Bool
-won side board = False
+won side board = 
+	any (conqueredBy side board) $ Map.elems threes
 
+conqueredBy :: Side -> Board -> Three -> Bool
+conqueredBy side board =
+	and . map (\ pos -> 
+				(fromMaybe '-' $ Map.lookup pos board) == side)
 
 ----------
 
 main :: IO ()
 main = do
 	putStrLn $ "welcome inside the tic-tac-tonad" 
-	putStrLn $ "you must now fight an impure battle of I/O" ++ "\n"
+	putStrLn $ "you must now fight an impure battle of I and O" ++ "\n"
 	putStrLn $ "here are the position numbers" ++ "\n"
 	putStrLn $ prettyPrint config ++ "\n"
 	putStrLn $ "here's the board" ++ "\n"
@@ -108,10 +126,12 @@ getMove side board = do
 
 
 -- todo: 
--- check for win
 -- write AI 
 -- write peanut gallery
+
+-- fix display so it aligns in terminal (or use gloss)
 -- fix -XScopedTypeVariables?
 -- learn about do notation (bind, why considered harmful)
+-- n-tac-toe
 
 
