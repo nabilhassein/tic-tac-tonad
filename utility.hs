@@ -14,6 +14,11 @@ board = [['*', '*', '*'],
 		 ['*', '*', '*']]
 -}
 
+b = Map.fromList 
+	[(0 :: Int, 'I'), (1 :: Int, 'O'), (2 :: Int, '*'), 
+	 (3 :: Int, 'I'), (4 :: Int, 'I'), (5 :: Int, '*'), 
+	 (6 :: Int, '*'), (7 :: Int, 'O'), (8 :: Int, 'O')]
+
 type Board = Map.Map Int Char
 --type Three = Map.Map String [Int]
 type Three = [Int]
@@ -54,6 +59,10 @@ prettyPrint board =
 
 isEmpty :: Char -> Bool
 isEmpty pos = pos /= 'I' && pos /= 'O'
+
+numEmpty :: Board -> Int
+numEmpty = 
+	Map.fold (\ tile acc -> if isEmpty tile then acc + 1 else acc) 0
 
 -- maps have strange update / alter functions
 addMove :: Side -> Int -> Board -> Board

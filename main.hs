@@ -71,7 +71,7 @@ getAIMove :: Side -> IO Board -> IO Board
 getAIMove side board = do
 	putStrLn $ "AI/O is thinking" 
 	boardResult <- board
-	let newBoard = makeAImove side boardResult
+	let newBoard = makeBadAImove side boardResult
 	return newBoard	
 
 
