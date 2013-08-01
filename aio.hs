@@ -15,18 +15,35 @@ import Utility
 -- or i could put an EmptyTree with a minimax value of -inf
 --data MinTree Board = EmptyTree | Node Board 
 
-data MaxTree b v = EmptyMaxTree | MaxNode b v [MinTree b v] deriving (Eq, Show)
+data MaxTree b v = EmptyMaxTree | MaxNode b v (MinTree b v) deriving (Eq, Show)
 data MinTree b v = EmptyMinTree | MinNode b v [MaxTree b v] deriving (Eq, Show)
 -- the number of children should really be parametrized by board size
 -- but i don't think it's the type's responsibility to deal with that
 
 -- this is totally wrong btw. side parameters? size? recursion?
+-- maybe the mintree should just be one -- after all, there should only be one path
+-- maybe it should really be a linked list of maxBoard and minBoard
 maxTree :: Side -> Board -> MaxTree Board Int
-maxTree side board = MaxNode board (calcMinimax board) (replicate (numEmpty board) EmptyMinTree)
+maxTree side board = 
+	| full board = MaxNode board (calcMinimax board) [EmptyMinTree]
+	| otherwise = MaxNode board (pickMax $ maxTree ) 
+
+-- this is totally wrong btw. side parameters? size? recursion?
+minTree :: Side -> Board -> MinTree Board Int
+minTree side board = 
+	| 
 
 calcMinimax :: Board -> Int
-calcMinimax board = 1
+calcMinimax board = 
 
+-- given a MaxTree, picks the board of maximum minimax value in the next ply (of MinTrees)
+pickMax :: MaxTree Board Int -> Board
+pickMax (MaxNode board value mintrees) =
+	-- go through mintrees, compare by value, return board of max value 
+
+
+-- should work for general -- playing maximizing and minimizing side
+-- side doesn't matter -- AI by default will always play the maximizer
 makeAImove :: Side -> Board -> Board
 makeAImove side board = 
 	pickMax side $ maxTree side board 
