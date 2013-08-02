@@ -13,15 +13,26 @@ import Utility
 data MaxList b v = EmptyMaxBoard | MaxBoard b v (MinList b v) deriving (Eq, Show)
 data MinList b v = EmptyMinBoard | MinBoard b v (MaxList b v) deriving (Eq, Show)
 
+instance (Eq b, Ord v) => Ord (MaxList b v) where
+	compare EmptyMaxBoard _ = LT 
+	compare _ EmptyMaxBoard = GT
+	compare l1@(MaxBoard _ v1 _) l2@(MaxBoard _ v2 _) = compare v1 v2
+
+instance (Eq b, Ord v) => Ord (MinList b v) where
+	compare EmptyMinBoard _ = LT 
+	compare _ EmptyMinBoard = GT
+	compare l1@(MinBoard _ v1 _) l2@(MinBoard _ v2 _) = compare v1 v2
+
 -- side?
+-- remove the minTree $ part?
 maxTree :: Side -> Board -> MaxList Board Int 
-maxTree side board = 
-	| full board = MaxBoard board (minimaxVal side board) (EmptyMinBoard)
+maxTree side board 
+	| full board = MaxBoard board (minimaxVal side board) EmptyMinBoard
 	| otherwise = MaxBoard board recursiveVal recursiveList
-		where recursiveVal = minimaxVal $ board recursiveList
-			  board (MinBoard b v maxlist) = b
-			  recursiveList = minTree $ 
-			  	minInPly $ map minTree $ enumerate side board 
+		where recursiveVal = minimaxVal side (board recursiveList);
+			  board (MinBoard b v maxlist) = b;
+			  recursiveList = {-minTree $ -}
+			  	minInPly $ map (\ (s, b) -> minTree s b) $ enumerate (opposite side) board
 	-- needs to be of type MinList b v
 	-- make the actual minTree the minTree with the greatest value
 	-- enumerate all the possible moves, map minTree on them, 
@@ -30,33 +41,40 @@ maxTree side board =
 	-- how much in a data structure?
 
 -- can't tell if this works??????
+-- reverse sides
+-- i need to figure out how to refactor this -- call with opposite side, min max function???
 minTree :: Side -> Board -> MinList Board Int 
-minTree side board = 
-	| full board = MinBoard board (minimaxVal side board) (EmptyMaxBoard)
+minTree side board 
+	| full board = MinBoard board (minimaxVal side board) EmptyMaxBoard
 	| otherwise = MinBoard board recursiveVal recursiveList
-		where recursiveVal = minimaxVal $ board recursiveList
-			  board (MaxBoard b v minlist) = b
-			  recursiveList = maxTree $ 
-			  	maxInPly $ map maxTree $ enumerate side board 
-
+		where recursiveVal = minimaxVal side (board recursiveList);
+			  board (MaxBoard b v minlist) = b;
+			  recursiveList = {- maxTree $ -}
+			  	maxInPly $ map (\ (s, b) -> maxTree s b) $ enumerate (opposite side) board
 --
 
 -- the work happens here
 minimaxVal :: Side -> Board -> Int 
-miniMaxval side board =
-
+minimaxVal side board 
+	| won side board = 1
+	| won (opposite side) board = -1
+	| otherwise = 0 
 
 -- for each free space, put that side piece in the board
-enumerate :: Side -> Board -> [Board]
+-- edge cases?
+enumerate :: Side -> Board -> [(Side, Board)]
 enumerate side board =
+	zip [side, side..] $ map (addMove side board) $ filter (posIsEmpty board) [0..8]
 
 ---
 
-maxInPly :: 
+-- lists can't be empty..
+maxInPly :: [MaxList Board Int] -> MaxList Board Int 
+maxInPly = maximum 
 
 
-minInPly ::
-
+minInPly :: [MinList Board Int] -> MinList Board Int
+minInPly = minimum
 
 -- side?
 maxBoard :: MaxList Board Int -> Board 
@@ -69,10 +87,10 @@ minBoard (MinBoard minb minv (MaxBoard maxb maxv minlist)) = maxb
 --
 
 maxVal :: MaxList Board Int -> Int
-maxBoard (MaxBoard maxb maxv (MinBoard minb minv maxlist)) = minv
+maxVal (MaxBoard maxb maxv (MinBoard minb minv maxlist)) = minv
 
 minVal :: MinList Board Int -> Int
-minBoard (MinBoard minb minv (MaxBoard maxb maxv minlist)) = maxv
+minVal (MinBoard minb minv (MaxBoard maxb maxv minlist)) = maxv
 
 ---
 

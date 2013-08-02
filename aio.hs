@@ -41,7 +41,6 @@ pickMax :: MaxTree Board Int -> Board
 pickMax (MaxNode board value mintrees) =
 	-- go through mintrees, compare by value, return board of max value 
 
-
 -- should work for general -- playing maximizing and minimizing side
 -- side doesn't matter -- AI by default will always play the maximizer
 makeAImove :: Side -> Board -> Board

@@ -57,16 +57,19 @@ prettyPrint board =
 		where list = Map.toList board;
 			  inRange lower upper (k, v) = lower <= k && k <= upper
 
+posIsEmpty :: Board -> Int -> Bool
+posIsEmpty board pos = isEmpty $ fromMaybe '-' $ Map.lookup pos board
+
 isEmpty :: Char -> Bool
-isEmpty pos = pos /= 'I' && pos /= 'O'
+isEmpty val = val /= 'I' && val /= 'O'
 
 numEmpty :: Board -> Int
 numEmpty = 
 	Map.fold (\ tile acc -> if isEmpty tile then acc + 1 else acc) 0
 
 -- maps have strange update / alter functions
-addMove :: Side -> Int -> Board -> Board
-addMove side pos board =
+addMove :: Side -> Board -> Int -> Board
+addMove side board pos =
 	Map.alter f pos board
 		where f _ = Just side
 
@@ -82,6 +85,10 @@ conqueredBy side board =
 full :: Board -> Bool
 full =
 	and . map (not . isEmpty) . Map.elems 
+
+opposite :: Side -> Side
+opposite 'I' = 'O'
+opposite 'O' = 'I'
 
 
 
