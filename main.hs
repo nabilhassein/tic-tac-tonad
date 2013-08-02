@@ -64,14 +64,14 @@ getMove side board = do
 				putStrLn $ "\n" ++ "error: moved in an occupied space. too impure of a move" ++ "\n"
 				getMove side board
 			else do -- valid move
-				let newBoard = addMove side pos boardResult;
+				let newBoard = addMove side boardResult pos;
 				return newBoard
 
 getAIMove :: Side -> IO Board -> IO Board
 getAIMove side board = do
 	putStrLn $ "AI/O is thinking" 
 	boardResult <- board
-	let newBoard = makeBadAImove side boardResult
+	let newBoard = makeAImove side boardResult
 	return newBoard	
 
 

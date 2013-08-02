@@ -23,16 +23,19 @@ instance (Eq b, Ord v) => Ord (MinList b v) where
 	compare _ EmptyMinBoard = GT
 	compare l1@(MinBoard _ v1 _) l2@(MinBoard _ v2 _) = compare v1 v2
 
+-- ah! top node is *current* board!
 -- side?
 -- remove the minTree $ part?
 maxTree :: Side -> Board -> MaxList Board Int 
 maxTree side board 
 	| full board = MaxBoard board (minimaxVal side board) EmptyMinBoard
-	| otherwise = MaxBoard board recursiveVal recursiveList
-		where recursiveVal = minimaxVal side (board recursiveList);
-			  board (MinBoard b v maxlist) = b;
+	| otherwise = MaxBoard board recursiveVal recursiveList -- it's not complaining about this board?
+		where recursiveVal = minimaxVal side (boardOf recursiveList);
+			  boardOf (MinBoard b v maxlist) = b; 
 			  recursiveList = {-minTree $ -}
-			  	minInPly $ map (\ (s, b) -> minTree s b) $ enumerate (opposite side) board
+			  	maxInPly $ map (\ (s, b) -> minTree s b) $ enumerate side board
+			  	-- switched minInPly -> maxInPly
+
 	-- needs to be of type MinList b v
 	-- make the actual minTree the minTree with the greatest value
 	-- enumerate all the possible moves, map minTree on them, 
@@ -40,17 +43,20 @@ maxTree side board
 	-- hmm.. how much state/structure to store in functions and passing stuff?
 	-- how much in a data structure?
 
--- can't tell if this works??????
+-- can't tell if this works??
 -- reverse sides
 -- i need to figure out how to refactor this -- call with opposite side, min max function???
+
 minTree :: Side -> Board -> MinList Board Int 
 minTree side board 
 	| full board = MinBoard board (minimaxVal side board) EmptyMaxBoard
 	| otherwise = MinBoard board recursiveVal recursiveList
-		where recursiveVal = minimaxVal side (board recursiveList);
-			  board (MaxBoard b v minlist) = b;
+		where recursiveVal = minimaxVal side (boardOf recursiveList);
+			  boardOf (MaxBoard b v minlist) = b;
 			  recursiveList = {- maxTree $ -}
-			  	maxInPly $ map (\ (s, b) -> maxTree s b) $ enumerate (opposite side) board
+			  	minInPly $ map (\ (s, b) -> maxTree s b) $ enumerate (opposite side) board
+			  	-- switched maxInPly -> minInPly
+
 --
 
 -- the work happens here
@@ -69,11 +75,11 @@ enumerate side board =
 ---
 
 -- lists can't be empty..
-maxInPly :: [MaxList Board Int] -> MaxList Board Int 
+maxInPly :: Ord a => [a] -> a
 maxInPly = maximum 
 
 
-minInPly :: [MinList Board Int] -> MinList Board Int
+minInPly :: Ord a => [a] -> a
 minInPly = minimum
 
 -- side?
