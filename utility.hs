@@ -23,6 +23,7 @@ type Board = Map.Map Int Char
 --type Three = Map.Map String [Int]
 type Three = [Int]
 type Side = Char
+-- TODO: implement data Side = I | O
 --type Position = Int
 
 config :: Board
