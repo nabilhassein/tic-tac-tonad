@@ -24,17 +24,31 @@ instance (Eq b, Ord v) => Ord (MinList b v) where
 	compare _ EmptyMinTree = GT
 	compare l1@(MinBoard _ v1 _) l2@(MinBoard _ v2 _) = compare v1 v2
 
+maxTreeInit :: Side -> Board -> MaxList Board Int
+maxTreeInit side board
+	| full board = MaxBoard board (minimaxVal side board) EmptyMinTree
+	| won side board = MaxBoard board 1 EmptyMinTree
+	| won (opposite side) board = MaxBoard board (-1) EmptyMinTree
+	| otherwise = MaxBoard board recursiveVal recursiveList 
+		where recursiveVal = valueOf recursiveList;
+			  valueOf (MinBoard b v maxlist) = v; 
+			  recursiveList =
+			  	maxInPly $ map (\ (s, b) -> minTree s b) $ enumerate side board
+
 -- ah, top node is *current* board
+-- wrong: top node should be *best* board
 -- side?
 -- remove the minTree $ part?
 maxTree :: Side -> Board -> MaxList Board Int 
 maxTree side board 
 	| full board = MaxBoard board (minimaxVal side board) EmptyMinTree
+	| won side board = MaxBoard board 1 EmptyMinTree
+	| won (opposite side) board = MaxBoard board (-1) EmptyMinTree
 	| otherwise = MaxBoard board recursiveVal recursiveList -- it's not complaining about this board?
-		where recursiveVal = minimaxVal side (boardOf recursiveList);
-			  boardOf (MinBoard b v maxlist) = b; 
+		where recursiveVal = valueOf recursiveList;
+			  valueOf (MinBoard b v maxlist) = v; 
 			  recursiveList =
-			  	maxInPly $ map (\ (s, b) -> minTree s b) $ enumerate side board
+			  	maxInPly $ map (\ (s, b) -> minTree s b) $ enumerate (opposite side) board
 			  	-- switched minInPly -> maxInPly
 
 	-- needs to be of type MinList b v
@@ -50,9 +64,11 @@ maxTree side board
 minTree :: Side -> Board -> MinList Board Int 
 minTree side board 
 	| full board = MinBoard board (minimaxVal side board) EmptyMaxTree
+	| won side board = MinBoard board 1 EmptyMaxTree
+	| won (opposite side) board = MinBoard board (-1) EmptyMaxTree
 	| otherwise = MinBoard board recursiveVal recursiveList
-		where recursiveVal = minimaxVal side (boardOf recursiveList);
-			  boardOf (MaxBoard b v minlist) = b;
+		where recursiveVal = valueOf recursiveList;
+			  valueOf (MaxBoard b v minlist) = v;
 			  recursiveList =
 			  	minInPly $ map (\ (s, b) -> maxTree s b) $ enumerate (opposite side) board
 			  	-- switched maxInPly -> minInPly
@@ -104,26 +120,48 @@ minVal (MinBoard minb minv (MaxBoard maxb maxv minlist)) = maxv
 -- should side be a parameter?
 makeAImove :: Side -> Board -> Board
 makeAImove side board = 
-	maxBoard $ maxTree side board 
+	maxBoard $ maxTreeInit side board 
 
 const_side :: Side
 const_side = 'I'
 
-const_board :: Board 
-const_board =
+const_board0 :: Board 
+const_board0 =
+	Map.fromList 
+	[(0 :: Int, '*'), (1 :: Int, '*'), (2 :: Int, '*'), 
+	 (3 :: Int, '*'), (4 :: Int, '*'), (5 :: Int, '*'), 
+	 (6 :: Int, '*'), (7 :: Int, '*'), (8 :: Int, '*')]
+
+const_board1 :: Board 
+const_board1 =
+	Map.fromList 
+	[(0 :: Int, 'O'), (1 :: Int, '*'), (2 :: Int, '*'), 
+	 (3 :: Int, '*'), (4 :: Int, '*'), (5 :: Int, '*'), 
+	 (6 :: Int, 'O'), (7 :: Int, 'I'), (8 :: Int, 'I')]
+
+const_board2 :: Board 
+const_board2 =
 	Map.fromList 
 	[(0 :: Int, 'I'), (1 :: Int, 'O'), (2 :: Int, '*'), 
 	 (3 :: Int, 'I'), (4 :: Int, 'I'), (5 :: Int, '*'), 
 	 (6 :: Int, '*'), (7 :: Int, 'O'), (8 :: Int, 'O')]
 
---- DEBUGGING CODE
+const_board3 :: Board 
+const_board3 =
+	Map.fromList 
+	[(0 :: Int, '*'), (1 :: Int, '*'), (2 :: Int, '*'), 
+	 (3 :: Int, '*'), (4 :: Int, 'O'), (5 :: Int, '*'), 
+	 (6 :: Int, '*'), (7 :: Int, '*'), (8 :: Int, '*')]
+
+-- DEBUGGING CODE
+-- i should have written this first
 
 main :: IO ()
 main = do 
 	putStrLn $ "side: " ++ [const_side] ++ "\n"
 	putStrLn $ "initial board: " ++ "\n"
-	putStrLn $ prettyPrint const_board ++ "\n\n" ++ "-----" ++ "\n"
-	let tree = maxTree const_side const_board 
+	putStrLn $ prettyPrint const_board1 ++ "\n\n" ++ "-----" ++ "\n"
+	let tree = maxTreeInit const_side const_board1
 	showMaxTree tree
 -- should it be a MaxTree?
 
@@ -156,8 +194,20 @@ makeBadAImove side board =
 			  pos = (!! 0) $ Map.keys $ Map.filter isEmpty board
 
 
--- to fix: terminate tree/list upon win, give that a final value of 1
+-- to fix: 
+-- moves are by sides "I, O, O, I, I, ..""
+	-- fixed, but did "opposite side" hack in makeAImove
+	-- fixed again? with maxTreeInit
+-- fix efficiency
+
 -- also, value of boards in list not assigned correctly
+-- wait -- it's only the utilities of the *terminal states* that bubble up. 
+	-- but it's already doing that
+	-- no, it's not -- it's calculating the minimax value of the board, not taking its value
+
+-- top node should be *best* board, not first board
+-- no, top node should be *best next move*, not *best board*
+-- no, actually top node should be first board, the next board should be best next move
 
 
 
