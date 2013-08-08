@@ -2,7 +2,7 @@ import Data.List
 import qualified Data.Map as Map
 import Data.Maybe
 
-import AIO1
+import AIO2
 import Utility
 
 main :: IO ()

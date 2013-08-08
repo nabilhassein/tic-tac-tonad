@@ -24,6 +24,8 @@ instance (Eq b, Ord v) => Ord (MinList b v) where
 	compare _ EmptyMinTree = GT
 	compare l1@(MinBoard _ v1 _) l2@(MinBoard _ v2 _) = compare v1 v2
 
+-- lots of duplicated code
+
 maxTreeInit :: Side -> Board -> MaxList Board Int
 maxTreeInit side board
 	| full board = MaxBoard board (minimaxVal side board) EmptyMinTree
@@ -35,10 +37,7 @@ maxTreeInit side board
 			  recursiveList =
 			  	maxInPly $ map (\ (s, b) -> minTree s b) $ enumerate side board
 
--- ah, top node is *current* board
--- wrong: top node should be *best* board
 -- side?
--- remove the minTree $ part?
 maxTree :: Side -> Board -> MaxList Board Int 
 maxTree side board 
 	| full board = MaxBoard board (minimaxVal side board) EmptyMinTree
@@ -54,12 +53,12 @@ maxTree side board
 	-- needs to be of type MinList b v
 	-- make the actual minTree the minTree with the greatest value
 	-- enumerate all the possible moves, map minTree on them, 
-	-- hmm.. how much state/structure to store in functions and passing stuff?
+	-- how much state/structure to store in functions and passing stuff?
 	-- how much in a data structure?
 
 -- can't tell if this works
 -- reverse sides
--- i need to figure out how to refactor this -- call with opposite side, min max function???
+-- i need to figure out how to refactor this -- call with opposite side, min max function?
 
 minTree :: Side -> Board -> MinList Board Int 
 minTree side board 
@@ -122,6 +121,8 @@ makeAImove :: Side -> Board -> Board
 makeAImove side board = 
 	maxBoard $ maxTreeInit side board 
 
+-----------
+
 const_side :: Side
 const_side = 'I'
 
@@ -153,11 +154,10 @@ const_board3 =
 	 (3 :: Int, '*'), (4 :: Int, 'O'), (5 :: Int, '*'), 
 	 (6 :: Int, '*'), (7 :: Int, '*'), (8 :: Int, '*')]
 
--- DEBUGGING CODE
--- i should have written this first
+-- OUTPUT/DEBUGGING CODE
 
-main :: IO ()
-main = do 
+mainx :: IO ()
+mainx = do 
 	putStrLn $ "side: " ++ [const_side] ++ "\n"
 	putStrLn $ "initial board: " ++ "\n"
 	putStrLn $ prettyPrint const_board1 ++ "\n\n" ++ "-----" ++ "\n"
@@ -165,7 +165,7 @@ main = do
 	showMaxTree tree
 -- should it be a MaxTree?
 
--- i should really refactor MaxList/MinList b v to be a generic node
+-- i should refactor MaxList/MinList b v to be a generic node
 -- **with side encoded in type? there are no sides here
 showMaxTree :: MaxList Board Int -> IO ()
 showMaxTree (MaxBoard board val minlist) = do
@@ -200,14 +200,8 @@ makeBadAImove side board =
 	-- fixed again? with maxTreeInit
 -- fix efficiency
 
--- also, value of boards in list not assigned correctly
--- wait -- it's only the utilities of the *terminal states* that bubble up. 
-	-- but it's already doing that
-	-- no, it's not -- it's calculating the minimax value of the board, not taking its value
-
--- top node should be *best* board, not first board
--- no, top node should be *best next move*, not *best board*
--- no, actually top node should be first board, the next board should be best next move
+-- it's only the utilities of the *terminal states* that bubble up
+-- top node should be first board, the next board should be best next move
 
 
 
