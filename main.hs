@@ -17,8 +17,7 @@ main = do
 
 imove :: IO Board -> IO ()
 imove board = do
-	newBoard <- getAIMove 'I' board
-	putStrLn $ "okay." ++ "\n" 
+	newBoard <- getMove 'I' board
 	putStrLn $ prettyPrint newBoard ++ "\n"
 
 	if won 'I' newBoard
@@ -32,7 +31,7 @@ imove board = do
 
 omove :: IO Board -> IO ()
 omove board = do
-	newBoard <- getMove 'O' board
+	newBoard <- getAIMove 'O' board
 	putStrLn $ "\n" ++ prettyPrint newBoard ++ "\n"
 
 	if won 'O' newBoard

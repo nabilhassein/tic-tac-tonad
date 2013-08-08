@@ -8,34 +8,39 @@ import Debug.Trace
 
 import Utility
 
--- would like to do: type SidedBoard = (Side, Board), type decideFunc = ? (possible?)
--- anyway, -XFlexibleInstances
-instance Ord (Side, Board) where
-	compare sb1 sb2 = 
-		compare (utility sb1) (utility sb2) 
+
+type SidedBoard = (Side, Board)
 
 --- MISC FUNCTIONS
 
 -- uh-oh. are sides/boards being played and enumerated and utility-asssessed correctly
 
-utility :: (Side, Board) -> Int 
+-- uh-oh, the sides and utilities aren't negative, they're always positive
+-- utility isn't reversing properly, what matters is the maxSide *and* the current side
+-- **fix this or rewrite code again
+-- (t, t)=t, (t, f)=f, (f,t)=f, (f,f)=t
+utility :: SidedBoard -> Int 
 utility sidedBoard@(side, board)
-	| won side board = 1
-	| won (opposite side) board = -1
+	| side == maxSide && won maxSide board = 1
+	| side == maxSide && won minSide board = -1
+	| side == minSide && won minSide board = 1
+	| side == minSide && won maxSide board = -1
 	| full board = 0 
 	| otherwise = utility $ minimaxDecision (opposite side, board)
 
-decideFunc :: (Ord a) => Side -> ([a] -> a)
-decideFunc 'I' = maximum
-decideFunc 'O' = minimum
+decideFunc :: Side -> ([SidedBoard] -> SidedBoard)
+decideFunc side 
+	| side == 'I' = maximumBy compareUtility
+	| otherwise = minimumBy compareUtility -- 'O'
+	where compareUtility sb1 sb2 = compare (utility sb1) (utility sb2)
 
-enumerate :: (Side, Board) -> [(Side, Board)]
+enumerate :: SidedBoard -> [SidedBoard]
 enumerate (side, board) =
 	zip [side, side..] $ map (addMove side board) $ filter (posIsEmpty board) [0..8]
 
 -- MINIMAX
 
-minimaxDecision :: (Side, Board) -> (Side, Board)
+minimaxDecision :: SidedBoard -> SidedBoard
 minimaxDecision sidedBoard@(side, board) = 
 	decideFunc side $ enumerate sidedBoard
 
@@ -46,20 +51,27 @@ makeAImove side board = snd $ minimaxDecision (side, board)
 --- DEBUGGING CODE
 
 -- examples 
+-- fix this later
+maxSide :: Side 
+maxSide = 'I'
+
+minSide :: Side 
+minSide = 'O'
+
 const_side :: Side 
-const_side = 'I'
+const_side = 'O'
 
 const_board0 :: Board 
 const_board0 = 
 	Map.fromList 
-	[(0 :: Int, 'I'), (1 :: Int, 'I'), (2 :: Int, '*'), 
-	 (3 :: Int, '*'), (4 :: Int, '*'), (5 :: Int, '*'), 
+	[(0 :: Int, '*'), (1 :: Int, '*'), (2 :: Int, '*'), 
+	 (3 :: Int, '*'), (4 :: Int, 'I'), (5 :: Int, '*'), 
 	 (6 :: Int, '*'), (7 :: Int, '*'), (8 :: Int, '*')]
 
 -- print result
 
-main :: IO ()
-main = do
+mainx :: IO ()
+mainx = do
 	putStrLn $ "side: " ++ [const_side] ++ "\n"
 	putStrLn $ "initial board: " ++ "\n"
 	putStrLn $ prettyPrint const_board0
