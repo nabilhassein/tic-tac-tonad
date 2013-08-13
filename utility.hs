@@ -58,6 +58,15 @@ prettyPrint board =
 		where list = Map.toList board;
 			  inRange lower upper (k, v) = lower <= k && k <= upper
 
+prettyPrintDebug :: Board -> String
+prettyPrintDebug board = 
+	map snd $
+	filter (inRange 0 2) list
+	++ ((-1, ' ') : (filter (inRange 3 5) list))
+	++ ((-1, ' ') : (filter (inRange 6 8) list))
+		where list = Map.toList board;
+			  inRange lower upper (k, v) = lower <= k && k <= upper
+
 posIsEmpty :: Board -> Int -> Bool
 posIsEmpty board pos = isEmpty $ fromMaybe '-' $ Map.lookup pos board
 

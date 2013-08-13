@@ -2,7 +2,7 @@ import Data.List
 import qualified Data.Map as Map
 import Data.Maybe
 
-import AIO2
+import AIO3
 import Utility
 
 main :: IO ()
@@ -56,11 +56,11 @@ getMove side board = do
 
 	if checkMove == '-'
 		then do
-			putStrLn $ "\n" ++ "error: out of bounds. too impure of a move" ++ "\n"
+			putStrLn $ "\n" ++ "error: out of bounds" ++ "\n"
 			getMove side board
 		else if not $ isEmpty checkMove
 			then do
-				putStrLn $ "\n" ++ "error: moved in an occupied space. too impure of a move" ++ "\n"
+				putStrLn $ "\n" ++ "error: moved in an occupied space" ++ "\n"
 				getMove side board
 			else do -- valid move
 				let newBoard = addMove side boardResult pos;
