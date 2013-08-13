@@ -8,8 +8,6 @@ import Debug.Trace
 
 import Utility
 
-type SidedBoard = (Side, Board)
-
 --- MISC FUNCTIONS
 
 -- initial guards equivalent to norvig's terminalTest(state)
@@ -30,10 +28,6 @@ decideFunc side
 	| otherwise = minimumBy compareUtility -- 'O'
 	where compareUtility sb1 sb2 = compare (utility sb1) (utility sb2) -- questionable
 
-enumerate :: SidedBoard -> [SidedBoard]
-enumerate (side, board) =
-	zip [side, side..] $ map (addMove side board) $ filter (posIsEmpty board) [0..8]
-
 -- MINIMAX
 
 -- equivalent to norvig's minimaxDecision(state)
@@ -42,8 +36,11 @@ minimaxDecision sidedBoard@(side, board) =
 	traceShow (">> chosen board: " ++ prettyPrintDebug chosenBoard ++ "   chosen side: " ++ [chosenSide]) result
 	where result@(chosenSide, chosenBoard) = decideFunc side $ enumerate sidedBoard
 
+-- hardcode "move in the middle"; otherwise very slow and will go in top left corner
 makeAImove :: Side -> Board -> Board 
-makeAImove side board = snd $ minimaxDecision (side, board) 
+makeAImove side board 
+	| empty board = addMove side board 4
+	| otherwise = snd $ minimaxDecision (side, board) 
 
 
 --- DEBUGGING CODE
@@ -105,3 +102,10 @@ mainx = do
 
 -- NOTES
 -- i should program in literate haskell 
+-- implement data Side = I | O
+-- optimizations:
+	-- account for / ignore symmetric boards (AI plays differently, hmm)
+	-- choose first "win" board (such as in example.hs) or figure out effects of picking "max" (i.e. first winning board)
+	-- alpha-beta pruning
+
+

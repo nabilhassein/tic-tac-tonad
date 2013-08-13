@@ -17,7 +17,7 @@ main = do
 
 imove :: IO Board -> IO ()
 imove board = do
-	newBoard <- getMove 'I' board
+	newBoard <- getAIMove 'I' board
 	putStrLn $ prettyPrint newBoard ++ "\n"
 
 	if won 'I' newBoard
@@ -31,7 +31,7 @@ imove board = do
 
 omove :: IO Board -> IO ()
 omove board = do
-	newBoard <- getAIMove 'O' board
+	newBoard <- getMove 'O' board
 	putStrLn $ "\n" ++ prettyPrint newBoard ++ "\n"
 
 	if won 'O' newBoard
@@ -76,15 +76,6 @@ getAIMove side board = do
 
 
 -- todo: 
--- check for draw
--- write AI 
-	-- add capability for it to move on 'I' or 'O'
-	-- add flags for AIs of varying strategies
-	-- add capability for AIs to play against each other
--- fix win checking
--- split into modules? at least, organize it better
-
-
 
 -- rock paper scissors AI
 -- game of life, genetic algorithm
@@ -93,8 +84,7 @@ getAIMove side board = do
 -- "Terni Lapilli: each player has 3 pieces & had to move them around to empty spaces"
 -- not related, but: chatbot
 
--- fix display so it aligns in terminal (or use gloss)
+-- fix display so it aligns in terminal (or use gloss) (or prettyPrint like example.hs)
 -- fix -XScopedTypeVariables?
--- learn about do notation (bind, why considered harmful)
 
 

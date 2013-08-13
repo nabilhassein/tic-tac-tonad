@@ -4,27 +4,16 @@ import Data.List
 import qualified Data.Map as Map
 import Data.Maybe
 
-{-
-config = [['0', '1', '2'], 
-		  ['3', '4', '5'], 
-		  ['6', '7', '8']]
-
-board = [['*', '*', '*'],
-		 ['*', '*', '*'],
-		 ['*', '*', '*']]
--}
 
 b = Map.fromList 
 	[(0 :: Int, 'I'), (1 :: Int, 'O'), (2 :: Int, '*'), 
 	 (3 :: Int, 'I'), (4 :: Int, 'I'), (5 :: Int, '*'), 
 	 (6 :: Int, '*'), (7 :: Int, 'O'), (8 :: Int, 'O')]
 
-type Board = Map.Map Int Char
---type Three = Map.Map String [Int]
-type Three = [Int]
 type Side = Char
--- TODO: implement data Side = I | O
---type Position = Int
+type Three = [Int]
+type Board = Map.Map Int Char
+type SidedBoard = (Side, Board)
 
 config :: Board
 config = toBoard ['0'..'8']
@@ -83,6 +72,10 @@ addMove side board pos =
 	Map.alter f pos board
 		where f _ = Just side
 
+enumerate :: SidedBoard -> [SidedBoard]
+enumerate (side, board) =
+	zip [side, side..] $ map (addMove side board) $ filter (posIsEmpty board) [0..8]
+
 won :: Side -> Board -> Bool
 won side board = 
 	any (conqueredBy side board) $ Map.elems threes
@@ -95,6 +88,10 @@ conqueredBy side board =
 full :: Board -> Bool
 full =
 	and . map (not . isEmpty) . Map.elems 
+
+empty :: Board -> Bool
+empty = 
+	and . map isEmpty . Map.elems
 
 opposite :: Side -> Side
 opposite 'I' = 'O'
