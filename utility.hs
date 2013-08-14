@@ -66,6 +66,9 @@ numEmpty :: Board -> Int
 numEmpty = 
 	Map.fold (\ tile acc -> if isEmpty tile then acc + 1 else acc) 0
 
+numMoves :: Board -> Int 
+numMoves board = 9 - (numEmpty board)
+
 -- maps have strange update / alter functions
 addMove :: Side -> Board -> Int -> Board
 addMove side board pos =

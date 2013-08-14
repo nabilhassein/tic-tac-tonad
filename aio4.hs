@@ -1,4 +1,4 @@
-module AIO3 
+module AIO4
 where
 
 import Data.List
@@ -11,11 +11,12 @@ import Utility
 --- MISC FUNCTIONS
 
 -- initial guards equivalent to norvig's terminalTest(state)
-utility :: SidedBoard -> Int
+-- utility scaled by number of moves of *terminal* board, so for example 'I' will move correctly in test case #3
+utility :: SidedBoard -> Float
 utility sidedBoard@(side, board)
-	| won maxSide board = traceShow ("terminal board: " ++ prettyPrintDebug board ++ "   side: " ++ [side] ++ "    utility: " ++ "1") 1
-	| won minSide board = traceShow ("terminal board: " ++ prettyPrintDebug board ++ "   side: " ++ [side] ++ "    utility: " ++ "-1") (-1)
-	| full board = traceShow ("terminal full board: " ++ prettyPrintDebug board ++ "   side: " ++ [side] ++ "    utility: " ++ "0") 0 
+	| won maxSide board = traceShow ("terminal board: " ++ prettyPrintDebug board ++ "   side: " ++ [side] ++ "    utility: " ++ "1/m") (1.0 / (fromIntegral $ numMoves board)) 
+	| won minSide board = traceShow ("terminal board: " ++ prettyPrintDebug board ++ "   side: " ++ [side] ++ "    utility: " ++ "-1/m") (-1.0 / (fromIntegral $ numMoves board))
+	| full board = traceShow ("terminal full board: " ++ prettyPrintDebug board ++ "   side: " ++ [side] ++ "    utility: " ++ "0") 0.0
 	| otherwise = 
 		traceShow ("board:          " ++ prettyPrintDebug board ++ "   side: " ++ [side] ++ "    utility: " ++ (show ultimateUtility)) 
 			ultimateUtility -- questionable
@@ -54,7 +55,7 @@ minSide :: Side
 minSide = 'O'
 
 const_side :: Side 
-const_side = 'I'
+const_side = 'O'
 
 const_board0 :: Board 
 const_board0 = 
