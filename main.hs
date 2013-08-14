@@ -2,7 +2,7 @@ import Data.List
 import qualified Data.Map as Map
 import Data.Maybe
 
-import AIOfastestPlay
+import AIOfastestPlay_notrace
 import Utility
 
 main :: IO ()
@@ -17,7 +17,7 @@ main = do
 
 imove :: IO Board -> IO ()
 imove board = do
-	newBoard <- getAIMove 'I' board
+	newBoard <- getMove 'I' board
 	putStrLn $ prettyPrint newBoard ++ "\n"
 
 	if won 'I' newBoard
@@ -31,7 +31,7 @@ imove board = do
 
 omove :: IO Board -> IO ()
 omove board = do
-	newBoard <- getMove 'O' board
+	newBoard <- getAIMove 'O' board
 	putStrLn $ "\n" ++ prettyPrint newBoard ++ "\n"
 
 	if won 'O' newBoard

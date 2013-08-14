@@ -17,14 +17,12 @@ utility sidedBoard@(side, board)
 	| won maxSide board = 1.0 / (fromIntegral $ numMoves board)
 	| won minSide board = -1.0 / (fromIntegral $ numMoves board)
 	| full board = 0.0
-	| otherwise = 
-		traceShow ultimateUtility -- questionable
-		where ultimateUtility = utility $ minimaxDecision (opposite side, board)
+	| otherwise = utility $ minimaxDecision (opposite side, board)
 
 -- wraps up / calls norvig's maxValue(state) or minValue(state) depending on side
-decideFunc :: Side -> ([SidedBoard] -> SidedBoard)
+decideFunc :: Side -> [SidedBoard] -> SidedBoard
 decideFunc side 
-	| side == 'I' = maximumBy compareUtility
+	| side == maxSide = maximumBy compareUtility
 	| otherwise = minimumBy compareUtility -- 'O'
 	where compareUtility sb1 sb2 = compare (utility sb1) (utility sb2) -- questionable
 
@@ -33,8 +31,7 @@ decideFunc side
 -- equivalent to norvig's minimaxDecision(state)
 minimaxDecision :: SidedBoard -> SidedBoard
 minimaxDecision sidedBoard@(side, board) = 
-	result
-	where result@(chosenSide, chosenBoard) = decideFunc side $ enumerate sidedBoard
+	decideFunc side $ enumerate sidedBoard
 
 -- hardcode "move in the middle"; otherwise very slow and will go in top left corner
 makeAImove :: Side -> Board -> Board 
@@ -55,6 +52,13 @@ minSide = 'O'
 
 const_side :: Side 
 const_side = 'O'
+
+const_board :: Board 
+const_board = 
+	Map.fromList 
+	[(0 :: Int, '*'), (1 :: Int, '*'), (2 :: Int, '*'), 
+	 (3 :: Int, '*'), (4 :: Int, '*'), (5 :: Int, '*'), 
+	 (6 :: Int, '*'), (7 :: Int, '*'), (8 :: Int, '*')]
 
 const_board0 :: Board 
 const_board0 = 

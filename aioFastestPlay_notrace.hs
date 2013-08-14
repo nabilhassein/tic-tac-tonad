@@ -1,4 +1,4 @@
-module AIO4
+module AIOfastestPlay_notrace
 where
 
 import Data.List
@@ -11,37 +11,45 @@ import Utility
 --- MISC FUNCTIONS
 
 -- initial guards equivalent to norvig's terminalTest(state)
--- utility scaled by number of moves of *terminal* board, so for example 'I' will move correctly in test case #3
-utility :: SidedBoard -> Float
+utility :: SidedBoard -> Int
 utility sidedBoard@(side, board)
-	| won maxSide board = traceShow ("terminal board: " ++ prettyPrintDebug board ++ "   side: " ++ [side] ++ "    utility: " ++ "1/m") (1.0 / (fromIntegral $ numMoves board)) 
-	| won minSide board = traceShow ("terminal board: " ++ prettyPrintDebug board ++ "   side: " ++ [side] ++ "    utility: " ++ "-1/m") (-1.0 / (fromIntegral $ numMoves board))
-	| full board = traceShow ("terminal full board: " ++ prettyPrintDebug board ++ "   side: " ++ [side] ++ "    utility: " ++ "0") 0.0
-	| otherwise = 
-		traceShow ("board:          " ++ prettyPrintDebug board ++ "   side: " ++ [side] ++ "    utility: " ++ (show ultimateUtility)) 
-			ultimateUtility -- questionable
-		where ultimateUtility = utility $ minimaxDecision (opposite side, board)
+	| won maxSide board = 1 
+	| won minSide board = -1
+	| full board = 0
+	| otherwise = utility $ minimaxDecision (opposite side, board)
 
--- wraps up / calls norvig's maxValue(state) or minValue(state) depending on side
-decideFunc :: Side -> ([SidedBoard] -> SidedBoard)
-decideFunc side 
-	| side == 'I' = maximumBy compareUtility
-	| otherwise = minimumBy compareUtility -- 'O'
-	where compareUtility sb1 sb2 = compare (utility sb1) (utility sb2) -- questionable
+-- manual left fold that terminates upon finding the first winning board (as opposed to finding the board with highest utility among all)
+-- works because utilities are only -1, 0, 1
+-- doesn't seem any faster, though
+decideBoard :: Side -> [SidedBoard] -> SidedBoard
+decideBoard _ [board] = board
+decideBoard maxSide (b:bs)
+	| headUtility == 1 = b 
+	| headUtility >= tailUtility = b
+	| otherwise = tailBestBoard
+		where headUtility = utility b;
+			  tailUtility = utility tailBestBoard;
+			  tailBestBoard = decideBoard maxSide bs
+decideBoard minSide (b:bs)
+	| headUtility == -1 = b 
+	| headUtility <= tailUtility = b
+	| otherwise = tailBestBoard
+		where headUtility = utility b;
+			  tailUtility = utility tailBestBoard;
+			  tailBestBoard = decideBoard minSide bs
 
 -- MINIMAX
 
 -- equivalent to norvig's minimaxDecision(state)
 minimaxDecision :: SidedBoard -> SidedBoard
 minimaxDecision sidedBoard@(side, board) = 
-	traceShow (">> chosen board: " ++ prettyPrintDebug chosenBoard ++ "   chosen side: " ++ [chosenSide]) result
-	where result@(chosenSide, chosenBoard) = decideFunc side $ enumerate sidedBoard
+	decideBoard side $ enumerate sidedBoard
 
 -- hardcode "move in the middle"; otherwise very slow and will go in top left corner
 makeAImove :: Side -> Board -> Board 
 makeAImove side board 
-	| empty board = addMove side board 4
-	| otherwise = snd $ minimaxDecision (side, board) 
+	{-| empty board = addMove side board 4
+	| otherwise -} = snd $ minimaxDecision (side, board) 
 
 
 --- DEBUGGING CODE
@@ -105,8 +113,8 @@ mainx = do
 -- i should program in literate haskell 
 -- implement data Side = I | O
 -- optimizations:
+	-- negamax
 	-- account for / ignore symmetric boards (AI plays differently, hmm)
-	-- choose first "win" board (such as in example.hs) or figure out effects of picking "max" (i.e. first winning board)
 	-- alpha-beta pruning
 
 
