@@ -1,8 +1,8 @@
 tic-tac-tonad
 =============
 
-The main files are `main.hs`, `aio3.hs`, and `utility.hs`. Other files are left to document the progression of the AI code. 
-
-The AI is very slow in the beginning, so it is hard-coded to move in the middle. Remove the `traceShow` instances to remove the "thinking" printouts.
-
 Usage: `runhaskell -XScopedTypeVariables main`
+
+In `main`: Change `getMove` and `getAImove` to change the player for each side. Change `import AIOfastestPlay_notrace` to a different module name to use that AI instead.
+
+The AI is currently very slow for the first 2 moves.
